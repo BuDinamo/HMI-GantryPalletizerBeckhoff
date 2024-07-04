@@ -1,0 +1,1 @@
+# Pallet Configurator Documentation
