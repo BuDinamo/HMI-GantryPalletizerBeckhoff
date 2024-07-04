@@ -3,7 +3,7 @@ This is the official technical documenatation for Human Machine Interface of a G
 
 This documentation will include all the necessary syntax based on Beckhoff Infosys Webpage followed by all of the descriptions to ensure the reader to understand. I do hope this guide will be helpful in the future system development
 
-## Home Page
+## [Home Page](LandingPage/LandingPage.md)
 ![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/7c6e0d7a-ad22-44a0-872b-581a4a0cf6ff)
 
 This is the first page that will appear upon opening the HMI and will provide all the button for the navigation between the other functional pages. 
