@@ -1,9 +1,10 @@
-# Human Machine Interface for Gantry Palletizer by Eklesia Ibrani Budiarso
-This is the official technical documenatation for Human Machine Interface of a Gantry Palletizer system on behalf of Beckhoff Automation Indonesia By Eklesia Ibrani Budiarso.
+# Human Machine Interface for Gantry Palletizer
+This is the official technical documentation for Human Machine Interface of a Gantry Palletizer system on behalf of Beckhoff Automation Indonesia By ***Eklesia Ibrani Budiarso***.
 
+## About
 This documentation will include all the necessary syntax based on Beckhoff Infosys Webpage followed by all of the descriptions to ensure the reader to understand. I do hope this guide will be helpful in the future system development
 
-Click the rocket icon to direct the page
+🚀Click the rocket icon to direct the page
 
 ## Home Page - [🚀](LandingPage/LandingPage.md)
 ![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/7c6e0d7a-ad22-44a0-872b-581a4a0cf6ff)
@@ -26,8 +27,8 @@ Pallet Configurator serve the purpose of having the ability to choose multiple v
 ## Gantry Control Page - [🚀](GantryControl/GantryControl.md)
 
 This is the main control of the Gantry itself. Gantry Control serve the purpose of controlling the behavior of the machine. It has the ability to start, stop, or reset the whole Palletizing process. User may find most of their time here on this page to ensure the Palletizing proccess done correctly. There are 3 main sub-menu of this page which have their own function as well
-### Main Menu
+### Main Menu - [🚀](GantryControl/MainMenu.md)
 This is the first menu on Gantry Control page. As the name suggest, it consist of all the control to 
-### Jog Menu
-### Log Menu
+### Jog Menu - [🚀](GantryControl/JogMenu.md)
+### Log Menu - [🚀](GantryControl/LogMenu.md)
 ## Monitoring Page - [🚀](Monitoring/Monitoring.md)
