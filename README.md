@@ -6,7 +6,7 @@ This documentation will include all the necessary syntax based on Beckhoff Infos
 
 🚀Click the rocket icon to direct the page
 
-## Home Page - [🚀](LandingPage/LandingPage.md)
+## Landing Page - [🚀](LandingPage/LandingPage.md)
 ![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/7c6e0d7a-ad22-44a0-872b-581a4a0cf6ff)
 
 This is the first page that will appear upon opening the HMI and will provide all the button for the navigation between the other functional pages. 
