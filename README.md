@@ -1,7 +1,7 @@
 # Human Machine Interface for Gantry Palletizer by Eklesia Ibrani Budiarso
 This is the official technical documenatation for Human Machine Interface of a Gantry Palletizer system on behalf of Beckhoff Automation Indonesia By Eklesia Ibrani Budiarso.
 
-This documentation will include all the necessary syntax based on Beckhoff Infosys Webpage followed by all of the description to ensure the reader to understand.
+This documentation will include all the necessary syntax based on Beckhoff Infosys Webpage followed by all of the descriptions to ensure the reader to understand. I do hope this guide will be helpful in the future system development
 
 ## Home Page
 ![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/7c6e0d7a-ad22-44a0-872b-581a4a0cf6ff)
@@ -15,12 +15,12 @@ There are 5 main navigation button which are:
   
 ## Layer Configurator Page
 ![Layout_Editor](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/141b19f3-b66b-45e3-85de-049c33b8b3f7)
-
 Layer Configurator serve the purpose of a highly customizable Box arrangement on top of the Pallet. User may choose to arrange the box as they wish by using all the tools provided in this page.
+
 ## Pallet Configurator Page
 ![Preset_Editor](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/0f5ce9e3-dc16-46ae-9161-c72868c35e68)
+Pallet Configurator serve the purpose of having the ability to choose multiple variance of Layer on top of the Pallet. User may choose one or more Layer Preset saved from the Layer Configurator page to be stacked on top of the Pallet.
 
-Pallet Configurator serve the purpose of multiple variance of Layer on top of the Pallet. User may choose one or more Layer Preset saved from the Layer Configurator page to be stacked on top of the Pallet.
 ## Gantry Control Page
 
 This is the main control of the Gantry itself. Gantry Control serve the purpose of controlling the behavior of the machine. It has the ability to start, stop, or reset the whole Palletizing process. User may find most of their time here on this page to ensure the Palletizing proccess done correctly. There are 3 main sub-menu of this page which have their own function as well
