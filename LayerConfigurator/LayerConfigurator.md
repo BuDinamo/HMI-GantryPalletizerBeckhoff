@@ -18,13 +18,12 @@ if (lebar > 0 && panjang > 0) {
 	    alert('WARNING!\nInvalid value for PANJANG or LEBAR');
 	}
 ```
-This function uses `TcHmi.Controls.get()` with attribute `.get` and `.set` based on [TcHmi Controls](https://infosys.beckhoff.com/english.php?content=../content/1033/te2000_tc3_hmi_engineering/3728912139.html&id=4044065286845169179) with usage as follow:
-- Fetch length and width value from input textbox
+- Fetch length and width value from input textbox using `TcHmi.Controls.get()` with attribute `.get` based on [TcHmi Controls](https://infosys.beckhoff.com/english.php?content=../content/1033/te2000_tc3_hmi_engineering/3729792267.html&id=987873840927842452)
 ```
 var lebar = TcHmi.Controls.get('lebarPALET').getValue();
 var panjang = TcHmi.Controls.get('panjangPALET').getValue();
 ```
-- Set length and width value to the Pallet rectangle
+- Set length and width value to the Pallet rectangle using `TcHmi.Controls.get()` with attribute `.set` based on [TcHmi Controls](https://infosys.beckhoff.com/english.php?content=../content/1033/te2000_tc3_hmi_engineering/3729792267.html&id=987873840927842452)
 ```
 TcHmi.Controls.get('PALLETTE_FIX').setWidth(lebar);
 TcHmi.Controls.get('PALLETTE_FIX').setHeight(panjang);
@@ -98,6 +97,32 @@ var newIndex = newArray.indexOf(uniqueId);
 TcHmi.Controls.get('TcHmiCombobox').setSelectedIndex(newIndex);
 TcHmi.Controls.get('TcHmiCombobox_1').setSelectedIndex(10);
 ```
+The source code is put inside this condition where `BoxCounter` is an incremental variable of [Internal Symbol]() for every click of the button:
+![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/9612b122-5160-4ee7-aaf8-f6fbb07c1590)
+
+- Read the current `BoxCounter` value for box identifier using `TcHmi.Symbol.read()` with symbol type `TcHmi.SymbolType.Internal` based on [TcHmi Symbol]()
+```
+var increment = TcHmi.Symbol.read('BoxCounter', TcHmi.SymbolType.Internal); 
+var uniqueId = 'BOX_' + increment;
+```
+- Fetch length and width value from input textbox using `TcHmi.Controls.get()` with attribute `.get` based on [TcHmi Controls](https://infosys.beckhoff.com/english.php?content=../content/1033/te2000_tc3_hmi_engineering/3729792267.html&id=987873840927842452)
+```
+var lebar = TcHmi.Controls.get('lebarBOX').getValue();
+var panjang = TcHmi.Controls.get('panjangBOX').getValue();
+```
+- Set up the box properties and attributes in a variable using `TcHmi.ControlFactory.createEx` with Textblock instance based on [TcHmi ControlFactory]()
+```
+var myRect = TcHmi.ControlFactory.createEx(
+    'TcHmi.Controls.Beckhoff.TcHmiTextblock',
+    uniqueId,
+    {data-tchmi}
+);
+```
+> [!Important]
+> Each instance needs the exact type, identifier and additional attributes ( in this case is *data-tchmi* ). Make sure `uniqueId` as identifier is unique for every box instance, if not error may occur
+
+- elaborate more on data-tchmi to customize the bx
+
 ### ❌Delete Box 
 ### ⬆Move Box 
 ### 🔁Rotate Box 
