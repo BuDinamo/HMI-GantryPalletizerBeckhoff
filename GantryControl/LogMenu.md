@@ -1,0 +1,1 @@
+# GC - Log Menu Documentation
