@@ -166,7 +166,7 @@ The source code is put inside this condition where `BoxCounter` is an incrementa
 	   }
 	```
 
-- Set the rotation state of the newly generated box in a separated data array. This is done as there will be a greater problem if the rotation is set using the built-in rotation transformation
+- Set the rotation state of the newly generated box in a separated data array. This is done to avoid problems if the rotation is set using the built-in rotation transformation
 	```Javascript
 	var rotationStates = JSON.parse(TcHmi.Symbol.read('rotationStates', TcHmi.SymbolType.Internal));
 	rotationStates[uniqueId] = 0;
@@ -192,14 +192,13 @@ The source code is put inside this condition where `BoxCounter` is an incrementa
 This is use to modify the box further outside of the generation button above. With this, user may fine tuned their liking of how the box looks.
 
 ### Prerequisites
-All off the Box Modifier are based on the Combobox of `Select Active ID`. And `Move Step` specific for Rotate.
+All off the Box Modifier are based on the Combobox of `Select Active ID`. And `Move Step` for Rotate.
 
 ![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/a43b02a6-ffcc-46a0-acd3-95f69354ba88)
 
 - `Select Active ID` have a data source of `RectIndex` from Internal Symbol as mention above
 - `Move Step` have its own data source of `StepIndex` from Internal Symbol which is an Array consist of value 1 to 10
-  
-  ```
+  ```Javascript
   ["Move Step (mm)",
   "1",
   "2",
@@ -212,6 +211,9 @@ All off the Box Modifier are based on the Combobox of `Select Active ID`. And `M
   "9",
   "10"]
   ```
+- As the box selected, it will show up in the `Active Rect` place holder
+
+	![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/4c2326d1-1c8c-4b7c-9a57-ffe245ac3bb9)
 
 ### ❌Delete Box 
 This modifier use to Delete box from the page. Can only be done per box. To delete all of the box, please refresh the whole page.
@@ -242,12 +244,12 @@ if (confirm("Delete " + myElement + " ? ")){
 	var myArray = TcHmi.Symbol.read('RectIndex', TcHmi.SymbolType.Internal);
 	```
 
-- Fetch the Box Index of the selected box from the Combobox using `TcHmi.Controls.get()` with attribute `.getSelectedIndex()`
+- Fetch the Box Index of the selected box from `Select Active ID` Combobox using `TcHmi.Controls.get()` with attribute `.getSelectedIndex()`
 	```Javascript
 	var myIndex = TcHmi.Controls.get('TcHmiCombobox').getSelectedIndex();
 	```
 
-- Fetch the Identifier of the selected box from the same Combobox using `TcHmi.Controls.get()` with attribute `.getSelectedText()`
+- Fetch the Identifier of the selected box from `Select Active ID` Combobox using `TcHmi.Controls.get()` with attribute `.getSelectedText()`
 
   Use this to `.get` the box directly
 	```Javascript
@@ -272,7 +274,130 @@ if (confirm("Delete " + myElement + " ? ")){
 	```
 
 ### ⬆Move Box 
+This modifier use to Move boxes accross the screen and arrange them inside the bounding box of Pallet. 
+
+![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/7b9b6e60-66ef-47d3-9cea-5a7c8bd672e4)
+
+All of the move button function was placed on the built in Event Handler in TwinCAT HMI. The two Event Handler I used are `.onStatePressed` and `onStateReleased`.
+
+![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/1d710503-7d8c-4a88-b0d4-ab21269bf8f4)
+
+The four move button have the same working principle, only differ in the arithmetic operation to the current position.
+
+`Move Up` and `Move Down` button code:
+```Javascript
+// Move Up
+MoveUp = setInterval(function() {
+	var x = TcHmi.Controls.get('activeRECT').getText();
+	var top1 = TcHmi.Controls.get(x).getTop();
+	var step = parseInt(TcHmi.Controls.get('TcHmiCombobox_1').getSelectedValue());
+	top1 -= (step*0.75);
+	TcHmi.Controls.get(x).setTop(top1)
+}, 75);
+
+// Move Down
+MoveDown = setInterval(function() {
+	var x = TcHmi.Controls.get('activeRECT').getText();
+	var top1 = TcHmi.Controls.get(x).getTop();
+	var step = parseInt(TcHmi.Controls.get('TcHmiCombobox_1').getSelectedValue());
+	top1 += (step*0.75);
+	TcHmi.Controls.get(x).setTop(top1)
+}, 75);
+```
+
+`Move Right` and `Move Left` button code:
+```Javascript
+// Move Right
+MoveRight = setInterval(function() {
+	var x = TcHmi.Controls.get('activeRECT').getText();
+	var top1 = TcHmi.Controls.get(x).getLeft();
+	var step = parseInt(TcHmi.Controls.get('TcHmiCombobox_1').getSelectedValue());
+	top1 += (step*0.75);
+	TcHmi.Controls.get(x).setLeft(top1);
+}, 75);
+
+// Move Left
+MoveLeft= setInterval(function() {
+	var x = TcHmi.Controls.get('activeRECT').getText();
+	var top1 = TcHmi.Controls.get(x).getLeft();
+	var step = parseInt(TcHmi.Controls.get('TcHmiCombobox_1').getSelectedValue());
+	top1 -= (step*0.75);
+	TcHmi.Controls.get(x).setLeft(top1);
+}, 75);
+```
+
+- Fetch the Identifier of the selected box from `Active Rect` placeholder using `TcHmi.Controls.get()` with attribute `.getText()`
+
+	```Javascript
+	var x = TcHmi.Controls.get('activeRECT').getText();
+	```
+- Fetch the Step Size for selected box from `Move Step` Combobox using `TcHmi.Controls.get()` with attribute `.getSelectedValue()`
+
+	```Javascript
+ 	var step = parseInt(TcHmi.Controls.get('TcHmiCombobox_1').getSelectedValue());
+ 	```
+- Fetch current Top value for `Move Up` and `Move Down` using `TcHmi.Controls.get()` with attribute `.getTop`
+
+	```Javascript
+  	var top1 = TcHmi.Controls.get(x).getTop();
+ 	```
+- Fetch current Left value for `Move Right` and `Move Left` using `TcHmi.Controls.get()` with attribute `.getLeft`
+
+	```Javascript
+ 	var top1 = TcHmi.Controls.get(x).getLeft();
+ 	```
+- Arithmetic operation for `Move Down` and `Move Right`
+
+	```Javascript
+	top1 += (step*0.75);
+ 	```
+- Arithmetic operation for `Move Up` and `Move Left`
+
+	```Javascript
+	top1 -= (step*0.75);
+ 	```
+- Write the new value to Top value for `Move Up` and `Move Down` using `TcHmi.Controls.get()` with attribute `.setLeft`
+
+	```Javascript
+ 	var top1 = TcHmi.Controls.get(x).setTop();
+ 	```
+- Write the new value to Left value for `Move Right` and `Move Left` using `TcHmi.Controls.get()` with attribute `.setLeft`
+
+	```Javascript
+ 	var top1 = TcHmi.Controls.get(x).setLeft();
+ 	```
 
 ### 🔁Rotate Box 
+This modifier use to Rotate boxes by its origin by the increment of 90 degree. 
+
+![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/7b9b6e60-66ef-47d3-9cea-5a7c8bd672e4)
+
+The rotate function is a mere switching the Width and Length value with addition of `rotationStates` data for the real rotation in the Gantry.
+
+`Rotate` button code:
+```Javascript
+var BOX_NUM = TcHmi.Controls.get('activeRECT').getText();
+temp = TcHmi.Controls.get(BOX_NUM).getWidth();
+TcHmi.Controls.get(BOX_NUM).setWidth(TcHmi.Controls.get(BOX_NUM).getHeight());
+TcHmi.Controls.get(BOX_NUM).setHeight(temp);
+
+var rotationStates = JSON.parse(TcHmi.Symbol.read('rotationStates', TcHmi.SymbolType.Internal));
+rotationStates[BOX_NUM] = (rotationStates[BOX_NUM] + 90) % 360;
+TcHmi.Symbol.writeEx('%i%rotationStates%/i%', JSON.stringify(rotationStates));
+```
+
+- Fetch the Identifier of the selected box from `Active Rect` placeholder using `TcHmi.Controls.get()` with attribute `.getText()`
+
+	```Javascript
+ 	```
+- Store the current Width value in a temporary variable
+
+	```Javascript
+ 	```
+- Set the Width value with the current Length value
+- Set the Length value with the temporary variable
+- Read the current `rotationStates` value of Box Rotation using `TcHmi.Symbol.read()` with symbol type `TcHmi.SymbolType.Internal`
+- Set the `rotationStates` the new value. Incremental of 90 degree with possible value of 0, 90, 180, and 270
+- Write the new `rotationStates` 
 ## 📏Pallet and Box Height 
 ## Preset Name
