@@ -578,3 +578,201 @@ function savedPreset() {
 }
 savedPreset();
 ```
+### Condition Checking
+- No Box available to be saved
+
+	```Javascript
+ 	var rectanglesArray = TcHmi.Symbol.read('RectIndex', TcHmi.SymbolType.Internal);
+	if (rectanglesArray.length <= 1) {
+		    alert('WARNING!\nInvalid amount of BOX');
+		    return;
+	}
+ 	```
+- Box or Pallet height is zero
+
+	```Javascript
+ 	palettall = TcHmi.Controls.get('PaletTall').getValue();
+	boxtall = TcHmi.Controls.get('BoxTall').getValue();
+	if (palettall <= 0 || boxtall <= 0) {
+		    alert('WARNING!\nInvalid value for TALL');
+		    return;
+	}
+ 	```
+- Preset Name is empty
+
+	```Javascript
+ 	var presetName = TcHmi.Controls.get('namaPreset').getText();
+	if (!presetName) {
+		    alert('WARNING!\nInvalid name for PRESET');
+		    return;
+	}
+ 	```
+- Preset Name is already exist
+
+	```Javascript
+ 	var CurrentPreset = TcHmi.Symbol.read('PLC_PresetSaver', TcHmi.SymbolType.Internal);
+	var existingPreset = CurrentPreset.find(function(p) { return p.preset === presetName; });	        
+	if (existingPreset)
+	{
+		alert('ERROR!\nPreset "' + presetName + '" already exists.');
+		return;
+	}
+ 	```
+
+### Prepare Box and Pallet Data
+- Fetch Pallet data
+
+	```Javascript
+ 	var specificRectangleId = "PALLETTE_FIX";
+	var specificRectangle = TcHmi.Controls.get(specificRectangleId);
+	if (specificRectangle) {
+		rectanglesData[specificRectangleId] = {
+			top: specificRectangle.getTop(),
+			left: specificRectangle.getLeft(),
+			width: specificRectangle.getWidth(),
+			height: specificRectangle.getHeight(),
+			tall: palettall
+		};
+	}
+ 	```
+- Fetch Box data
+
+	```Javascript
+ 	for (var i = 0; i < rectanglesArray.length; i++) {
+		var rectangleId = rectanglesArray[i];
+		var rectangle = TcHmi.Controls.get(rectangleId);
+		if (rectangle) {
+			var transform = rectangle.getTransform();
+			rectanglesData[rectangleId] = {
+				top: rectangle.getTop(),
+				left: rectangle.getLeft(),
+				width: rectangle.getWidth(),
+				height: rectangle.getHeight(),
+				tall: boxtall
+			};
+ 		}
+	}
+ 	```
+	- Check if Box overhang on top of Pallet
+
+		```Javascript
+  		if (rectangle.getLeft() < specificRectangle.getLeft() || rectangle.getTop() < specificRectangle.getTop() || (rectangle.getLeft()+rectangle.getWidth()*0.75) > (specificRectangle.getLeft()+specificRectangle.getWidth()*0.75) || (rectangle.getTop()+rectangle.getHeight()*0.75) > (specificRectangle.getTop()+specificRectangle.getHeight()*0.75)) 
+			{
+				alert('WARNING!\none or more boxes exceed the palette limit');
+				return;
+			}
+	 	```
+	- Check if Box have collision between other Boxes
+
+		```Javascript
+  		for (var j = i + 1; j < rectanglesArray.length; j++) {
+			var rect1 = TcHmi.Controls.get(rectanglesArray[i]);
+			var rect2 = TcHmi.Controls.get(rectanglesArray[j]);
+			if (rect1.getLeft() < rect2.getLeft() + rect2.getWidth()*0.75 &&
+			    rect1.getLeft() + rect1.getWidth()*0.75 > rect2.getLeft() && 
+			    rect1.getTop() < rect2.getTop() + rect2.getHeight()*0.75 &&
+			    rect1.getTop() + rect1.getHeight()*0.75 > rect2.getTop()) {
+			    alert('WARNING!\nCollision detected between ' + rectanglesArray[i] + ' and ' + rectanglesArray[j]);
+			    return;
+			}
+		}
+		```
+- Store Box and Pallet data in a JSON format
+
+	```Javascript
+ 	var data = {name:presetName, data:rectanglesData};
+ 	```
+
+### Save Preset Layer as a .CSV file
+- Fetch `rotationStates` from Internal Symbol
+
+	```Javascript
+ 	var rotationStates = JSON.parse(TcHmi.Symbol.read('rotationStates', TcHmi.SymbolType.Internal));
+ 	```
+- Rearrange the data in a suitable format and then Store it in an Array variable
+
+	```Javascript
+ 	for (var boxName in data.data) {
+		var box = data.data[boxName];
+		
+		let currentBox = [presetName, boxName, box.left, box.top, box.height, box.width, box.tall];
+		arr.push(currentBox);
+		console.log(arr);
+	}
+ 	```
+- Transfer the Array and `rotationStates` to PLC variable
+
+	```Javascript
+ 	for (var k = 0; k < arr.length; k++) {
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][0]%/s%', arr[k][0]);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][1]%/s%', arr[k][1]);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][2]%/s%', arr[k][2]);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][3]%/s%', arr[k][3]);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][4]%/s%', arr[k][4]);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][5]%/s%', arr[k][5]);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][6]%/s%', arr[k][6]);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][7]%/s%', rotationStates[arr[k][1]]);
+	}
+ 	```
+- Transfer the Preset Name to PLC variable
+
+	```Javascript
+ 	TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.WriteFileName%/s%', presetName);
+ 	```
+- Execute the PLC Program to save the data in .CSV file
+
+	```Javascript
+ 	TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.bGenerate%/s%', true);
+	```
+	- Wait for the process to finish
+
+		```Javascript
+  		await new Promise(resolve => {
+			let intervalBuffer = setInterval(() => {
+				TcHmi.Symbol.readEx2('%s%PLC1.CSV_WriteBOXToCSV.WriteDone%/s%', function (data7) {
+					if (data7.value == true) {
+						clearInterval(intervalBuffer);
+						resolve();
+					}
+				});
+			}, 100);
+		});
+	 	```
+
+### Save Preset Name as a separate .CSV file
+- Transfer the Preset Name to PLC variable
+
+	```Javascript
+ 	TcHmi.Symbol.writeEx('%s%PLC1.CSV_WritePRESETToCSV.sPresetName%/s%', presetName);
+ 	```
+- Execute the PLC Program to save Preset Name in .CSV file
+
+	```Javascript
+ 	TcHmi.Symbol.writeEx('%s%PLC1.CSV_WritePRESETToCSV.bGenerate%/s%', true, function (writeData) {
+			if (writeData.error === TcHmi.Errors.NONE) {
+				alert('SUCCESS!\nPreset "' + presetName + '" has been saved.');
+ 			}
+ 	});
+ 	```
+
+### Reset all
+```Javascript
+var myArray = TcHmi.Symbol.read('RectIndex', TcHmi.SymbolType.Internal);	// fetch RectIndex
+
+for (var i = 1; i < myArray.length; i++) {					// destroy all current boxes
+	var elementToRemove = TcHmi.Controls.get(myArray[i]);
+	if (elementToRemove) {
+		elementToRemove.destroy();
+	}
+}
+
+myArray = [myArray[0]];								// set an empty Array
+TcHmi.Symbol.writeEx2('%i%RectIndex%/i%', myArray);				// write the array back to RectIndex
+TcHmi.Symbol.writeEx('%i%rotationStates%/i%', {"PALLETTE_FIX": 0});		// empty rotationStates to only contain Pallet data
+TcHmi.Controls.get('TcHmiCombobox').setSelectedIndex(0);			// reset combobox to index zero
+TcHmi.Symbol.writeEx2('%i%BoxCounter%/i%', 0);					// reset BoxCounter to zero
+TcHmi.Controls.get('panjangBOX').setValue(0);					// reset textbox input to zero
+TcHmi.Controls.get('lebarBOX').setValue(0);					// reset textbox input to zero
+TcHmi.Controls.get('namaPreset').setText('');					// reset textbox input to empty
+TcHmi.View.load('LandingPage.view');						// return the page to Landing Page
+```
