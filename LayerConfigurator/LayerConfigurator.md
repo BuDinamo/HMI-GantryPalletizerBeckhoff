@@ -495,13 +495,17 @@ function savedPreset() {
 				return;
 			}
 	    		
-			var rect1 = TcHmi.Controls.get(rectanglesArray[i]);
-			var rect2 = TcHmi.Controls.get(rectanglesArray[i+1]);
-			if (rect1.getLeft() < rect2.getLeft() + rect2.getWidth()*0.75 && rect1.getLeft() + rect1.getWidth()*0.75 > rect2.getLeft() && rect1.getTop() < rect2.getTop() + rect2.getHeight()*0.75 && rect1.getTop() + rect1.getHeight()*0.75 > rect2.getTop())
-			{
-				alert('WARNING!\nCollision detected between ' + rectanglesArray[i] + ' and ' + rectanglesArray[j]);
-				return;
-			}
+			for (var j = i + 1; j < rectanglesArray.length; j++) {
+			        var rect1 = TcHmi.Controls.get(rectanglesArray[i]);
+			        var rect2 = TcHmi.Controls.get(rectanglesArray[j]);
+			        if (rect1.getLeft() < rect2.getLeft() + rect2.getWidth()*0.75 &&
+			            rect1.getLeft() + rect1.getWidth()*0.75 > rect2.getLeft() && 
+			            rect1.getTop() < rect2.getTop() + rect2.getHeight()*0.75 &&
+			            rect1.getTop() + rect1.getHeight()*0.75 > rect2.getTop()) {
+			            alert('WARNING!\nCollision detected between ' + rectanglesArray[i] + ' and ' + rectanglesArray[j]);
+			            return;
+			        }
+		        }
 		}		
 	}
 
