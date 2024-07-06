@@ -658,7 +658,9 @@ savedPreset();
 	- Check if Box overhang on top of Pallet
 
 		```Javascript
-  		if (rectangle.getLeft() < specificRectangle.getLeft() || rectangle.getTop() < specificRectangle.getTop() || (rectangle.getLeft()+rectangle.getWidth()*0.75) > (specificRectangle.getLeft()+specificRectangle.getWidth()*0.75) || (rectangle.getTop()+rectangle.getHeight()*0.75) > (specificRectangle.getTop()+specificRectangle.getHeight()*0.75)) 
+  		if (rectangle.getLeft() < specificRectangle.getLeft() || rectangle.getTop() < specificRectangle.getTop() ||
+  			(rectangle.getLeft()+rectangle.getWidth()*0.75) > (specificRectangle.getLeft()+specificRectangle.getWidth()*0.75) ||
+  			(rectangle.getTop()+rectangle.getHeight()*0.75) > (specificRectangle.getTop()+specificRectangle.getHeight()*0.75)) 
 			{
 				alert('WARNING!\none or more boxes exceed the palette limit');
 				return;
