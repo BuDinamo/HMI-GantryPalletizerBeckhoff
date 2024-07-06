@@ -178,7 +178,7 @@ The source code is put inside this condition where `BoxCounter` is an incrementa
 	
 	Then Write the newly push array to the same Internal Symbol using `TcHmi.Symbol.writeEx()`
 
-- Store existing boxes to an Array of Internal Symbol. This is for the `for loop` function later on the Add Layout Preset[🚀](LayerConfigurator/LayerConfigurator.md#add-preset)
+- Store existing boxes to an Array of Internal Symbol. This is for the `for loop` function later on the Add Layout Preset[🚀](LayerConfigurator/LayerConfigurator.md#pallet-height-box-height-and-preset-name)
 	```Javascript
 	var newArray = TcHmi.Symbol.read('RectIndex', TcHmi.SymbolType.Internal); 
 	newArray.push(uniqueId);
@@ -189,7 +189,7 @@ The source code is put inside this condition where `BoxCounter` is an incrementa
 	Then Write the newly push array to the same Internal Symbol using `TcHmi.Symbol.writeEx()`
 
 ## Box Modifier
-This is use to modify the box further outside of the generation button above. With this, user may fine tuned their liking of how the box looks.
+This section is use to modify the box further outside of the generation button above. With this, user may fine tuned their liking of how the box looks.
 
 ### Prerequisites
 All off the Box Modifier are based on the Combobox of `Select Active ID`. And `Move Step` for Rotate.
@@ -356,12 +356,12 @@ MoveLeft= setInterval(function() {
 	```Javascript
 	top1 -= (step*0.75);
  	```
-- Write the new value to Top value for `Move Up` and `Move Down` using `TcHmi.Controls.get()` with attribute `.setLeft`
+- Write the new Top value for `Move Up` and `Move Down` using `TcHmi.Controls.get()` with attribute `.setTop`
 
 	```Javascript
  	var top1 = TcHmi.Controls.get(x).setTop();
  	```
-- Write the new value to Left value for `Move Right` and `Move Left` using `TcHmi.Controls.get()` with attribute `.setLeft`
+- Write the new Left value for `Move Right` and `Move Left` using `TcHmi.Controls.get()` with attribute `.setLeft`
 
 	```Javascript
  	var top1 = TcHmi.Controls.get(x).setLeft();
@@ -389,15 +389,188 @@ TcHmi.Symbol.writeEx('%i%rotationStates%/i%', JSON.stringify(rotationStates));
 - Fetch the Identifier of the selected box from `Active Rect` placeholder using `TcHmi.Controls.get()` with attribute `.getText()`
 
 	```Javascript
+ 	var BOX_NUM = TcHmi.Controls.get('activeRECT').getText();
  	```
 - Store the current Width value in a temporary variable
 
 	```Javascript
+ 	temp = TcHmi.Controls.get(BOX_NUM).getWidth();
  	```
 - Set the Width value with the current Length value
+
+	```Javascript
+ 	TcHmi.Controls.get(BOX_NUM).setWidth(TcHmi.Controls.get(BOX_NUM).getHeight());
+ 	```
 - Set the Length value with the temporary variable
+
+	```Javascript
+ 	TcHmi.Controls.get(BOX_NUM).setHeight(temp);
+ 	```
 - Read the current `rotationStates` value of Box Rotation using `TcHmi.Symbol.read()` with symbol type `TcHmi.SymbolType.Internal`
+
+	```Javascript
+ 	var rotationStates = JSON.parse(TcHmi.Symbol.read('rotationStates', TcHmi.SymbolType.Internal));
+ 	```
 - Set the `rotationStates` the new value. Incremental of 90 degree with possible value of 0, 90, 180, and 270
-- Write the new `rotationStates` 
-## 📏Pallet and Box Height 
-## Preset Name
+
+	```Javascript
+ 	rotationStates[BOX_NUM] = (rotationStates[BOX_NUM] + 90) % 360;
+ 	```
+- Write the new `rotationStates` value back to the Internal Symbol
+
+	```Javascript
+ 	TcHmi.Symbol.writeEx('%i%rotationStates%/i%', JSON.stringify(rotationStates));
+ 	```
+
+## 📏Pallet Height, Box Height, and Preset Name
+This section is to input the Height value of the Box and Pallet and Name of the Preset. All boxes within the same Preset must have the same Height
+
+![Add_Preset](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/88dae1cb-e626-4539-9ab4-e601651bf612)
+
+The code is pretty long as it contains the whole checking measure
+
+`Add Preset` button code:
+```Javascript
+function savedPreset() {
+	var rectanglesArray = TcHmi.Symbol.read('RectIndex', TcHmi.SymbolType.Internal);
+	if (rectanglesArray.length <= 1) {
+		    alert('WARNING!\nInvalid amount of BOX');
+		    return;
+	}
+	
+	var presetName = TcHmi.Controls.get('namaPreset').getText();
+	if (!presetName) {
+		    alert('WARNING!\nInvalid name for PRESET');
+		    return;
+	}
+	
+	palettall = TcHmi.Controls.get('PaletTall').getValue();
+	boxtall = TcHmi.Controls.get('BoxTall').getValue();
+	if (palettall <= 0 || boxtall <= 0) {
+		    alert('WARNING!\nInvalid value for TALL');
+		    return;
+	}
+
+	var CurrentPreset = TcHmi.Symbol.read('PLC_PresetSaver', TcHmi.SymbolType.Internal);
+	var existingPreset = CurrentPreset.find(function(p) { return p.preset === presetName; });	        
+	if (existingPreset)
+	{
+		alert('ERROR!\nPreset "' + presetName + '" already exists.');
+		return;
+	}	
+	
+	var scale = JSON.parse(TcHmi.Symbol.read('ScaleTrans', TcHmi.SymbolType.Internal));
+	var origi JSON.parse(TcHmi.Symbol.read('OriginTrans', TcHmi.SymbolType.Internal));
+	
+	var rectanglesData = {};
+	
+	var specificRectangleId = "PALLETTE_FIX";
+	var specificRectangle = TcHmi.Controls.get(specificRectangleId);
+	if (specificRectangle) {
+		rectanglesData[specificRectangleId] = {
+			top: specificRectangle.getTop(),
+			left: specificRectangle.getLeft(),
+			width: specificRectangle.getWidth(),
+			height: specificRectangle.getHeight(),
+			tall: palettall
+		};
+	}
+	
+	for (var i = 0; i < rectanglesArray.length; i++) {
+		var rectangleId = rectanglesArray[i];
+		var rectangle = TcHmi.Controls.get(rectangleId);
+		if (rectangle) {
+			var transform = rectangle.getTransform();
+			rectanglesData[rectangleId] = {
+				top: rectangle.getTop(),
+				left: rectangle.getLeft(),
+				width: rectangle.getWidth(),
+				height: rectangle.getHeight(),
+				tall: boxtall
+			};
+
+			if (rectangle.getLeft() < specificRectangle.getLeft() || rectangle.getTop() < specificRectangle.getTop() || (rectangle.getLeft()+rectangle.getWidth()*0.75) > (specificRectangle.getLeft()+specificRectangle.getWidth()*0.75) || (rectangle.getTop()+rectangle.getHeight()*0.75) > (specificRectangle.getTop()+specificRectangle.getHeight()*0.75)) 
+			{
+				alert('WARNING!\none or more boxes exceed the palette limit');
+				return;
+			}
+	    		
+			var rect1 = TcHmi.Controls.get(rectanglesArray[i]);
+			var rect2 = TcHmi.Controls.get(rectanglesArray[i+1]);
+			if (rect1.getLeft() < rect2.getLeft() + rect2.getWidth()*0.75 && rect1.getLeft() + rect1.getWidth()*0.75 > rect2.getLeft() && rect1.getTop() < rect2.getTop() + rect2.getHeight()*0.75 && rect1.getTop() + rect1.getHeight()*0.75 > rect2.getTop())
+			{
+				alert('WARNING!\nCollision detected between ' + rectanglesArray[i] + ' and ' + rectanglesArray[j]);
+				return;
+			}
+		}		
+	}
+
+	var data = {name:presetName, data:rectanglesData};
+	let arr = [];
+	
+	async function processBoxes(data) {
+		var rotationStates = JSON.parse(TcHmi.Symbol.read('rotationStates', TcHmi.SymbolType.Internal));
+		
+		for (var boxName in data.data) {
+			var box = data.data[boxName];
+			
+			let currentBox = [presetName, boxName, box.left, box.top, box.height, box.width, box.tall];
+			arr.push(currentBox);
+			console.log(arr);
+		}
+		
+		for (var k = 0; k < arr.length; k++) {
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][0]%/s%', arr[k][0]);
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][1]%/s%', arr[k][1]);
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][2]%/s%', arr[k][2]);
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][3]%/s%', arr[k][3]);
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][4]%/s%', arr[k][4]);
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][5]%/s%', arr[k][5]);
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][6]%/s%', arr[k][6]);
+			TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.Box_Data['+ k +'][7]%/s%', rotationStates[arr[k][1]]);
+		}
+
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.WriteFileName%/s%', presetName);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WriteBOXToCSV.bGenerate%/s%', true);
+
+		await new Promise(resolve => {
+			let intervalBuffer = setInterval(() => {
+				TcHmi.Symbol.readEx2('%s%PLC1.CSV_WriteBOXToCSV.WriteDone%/s%', function (data7) {
+					if (data7.value == true) {
+						clearInterval(intervalBuffer);
+						resolve();
+					}
+				});
+			}, 100);
+		});	
+		
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WritePRESETToCSV.sPresetName%/s%', presetName);
+		TcHmi.Symbol.writeEx('%s%PLC1.CSV_WritePRESETToCSV.bGenerate%/s%', true, function (writeData) {
+			if (writeData.error === TcHmi.Errors.NONE) {
+				alert('SUCCESS!\nPreset "' + presetName + '" has been saved.');
+				
+				var myArray = TcHmi.Symbol.read('RectIndex', TcHmi.SymbolType.Internal);
+				for (var i = 1; i < myArray.length; i++) {
+					var elementToRemove = TcHmi.Controls.get(myArray[i]);
+					if (elementToRemove) {
+						elementToRemove.destroy();
+					}
+				}
+				myArray = [myArray[0]];
+				TcHmi.Symbol.writeEx2('%i%RectIndex%/i%', myArray);
+				TcHmi.Symbol.writeEx('%i%rotationStates%/i%', {"PALLETTE_FIX": 0});
+				TcHmi.Controls.get('TcHmiCombobox').setSelectedIndex(0);
+				TcHmi.Symbol.writeEx2('%i%BoxCounter%/i%', 0);
+				TcHmi.Controls.get('panjangBOX').setValue(0);
+				TcHmi.Controls.get('lebarBOX').setValue(0);
+				TcHmi.Controls.get('namaPreset').setText('');
+				TcHmi.View.load('LandingPage.view');
+			} else {
+				alert('ERROR!\nError writing preset "' + presetName + '" to csv', writeData.error);
+			}						                     	
+		});
+    }
+	processBoxes(data);
+}
+savedPreset();
+```
