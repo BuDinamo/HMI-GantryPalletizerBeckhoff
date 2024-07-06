@@ -5,6 +5,6 @@ This is the official technical documentation for Human Machine Interface of a Ga
 This documentation will include all the necessary syntax based on Beckhoff Infosys Webpage including all of the descriptions to ensure the reader to understand. I do hope this guide will be helpful in the future system development
 
 The documentation will be placed on respective folder:
-[Layer Configurator](LayerConfigurator/LayerConfigurator.md)
-[Pallet Configurator](PalletConfigurator/PalletConfigurator.md)
-[Gantry Control](GantryControl/GantryControl.md)
+- [Layer Configurator](LayerConfigurator/LayerConfigurator.md)
+- [Pallet Configurator](PalletConfigurator/PalletConfigurator.md)
+- [Gantry Control](GantryControl/GantryControl.md)
