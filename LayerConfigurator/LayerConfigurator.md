@@ -4,7 +4,7 @@ This page will focus on all of the components used within the Layer Configurator
 ![Layout_Editor](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/c761c32c-bb6b-4f6c-8e7b-72252cfee335)
 
 
-## Pallet Builder 
+## < Pallet Builder 
 This section is for modify the size of the Pallet being used in the real world.
 
 ![Palet_Builder](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/61f69728-f892-47b8-981a-d312eebd1ed0)
@@ -34,7 +34,7 @@ if (lebar > 0 && panjang > 0) {
 	TcHmi.Controls.get('PALLETTE_FIX').setHeight(panjang);
 	```
  
-## 📦Box Builder 
+## < Box Builder📦
 This section is for generating rectangle shape on screen to visualize boxes on top of the Pallet.
 
 ![image](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/e09b350d-a604-4059-ac1a-2eada3ff66fc)
@@ -188,7 +188,7 @@ The source code is put inside this condition where `BoxCounter` is an incrementa
 	
 	Then Write the newly push array to the same Internal Symbol using `TcHmi.Symbol.writeEx()`
 
-## Box Modifier
+## < Box Modifier
 This section is use to modify the box further outside of the generation button above. With this, user may fine tuned their liking of how the box looks.
 
 ### Prerequisites
@@ -422,7 +422,7 @@ TcHmi.Symbol.writeEx('%i%rotationStates%/i%', JSON.stringify(rotationStates));
  	TcHmi.Symbol.writeEx('%i%rotationStates%/i%', JSON.stringify(rotationStates));
  	```
 
-## 📏Pallet Height, Box Height, and Preset Name
+## < Pallet Height, Box Height, and Preset Name📏
 This section is to input the Height value of the Box and Pallet and Name of the Preset. All boxes within the same Preset must have the same Height
 
 ![Add_Preset](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/88dae1cb-e626-4539-9ab4-e601651bf612)
