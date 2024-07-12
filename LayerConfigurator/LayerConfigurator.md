@@ -422,7 +422,7 @@ TcHmi.Symbol.writeEx('%i%rotationStates%/i%', JSON.stringify(rotationStates));
  	TcHmi.Symbol.writeEx('%i%rotationStates%/i%', JSON.stringify(rotationStates));
  	```
 
-##📏Pallet Height, Box Height, and Preset Name
+## 📏Pallet Height, Box Height, and Preset Name
 This section is to input the Height value of the Box and Pallet and Name of the Preset. All boxes within the same Preset must have the same Height
 
 ![Add_Preset](https://github.com/BuDinamo/HMI-GantryPalletizerBeckhoff/assets/117176956/88dae1cb-e626-4539-9ab4-e601651bf612)
