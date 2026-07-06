@@ -1,5 +1,5 @@
 # Human Machine Interface for Gantry Palletizer
-This is the official technical documentation for Human Machine Interface of a Gantry Palletizer system on behalf of Beckhoff Automation Indonesia By ***Eklesia Ibrani Budiarso***.
+This is the official technical documentation for Human Machine Interface of a Gantry Palletizer system on behalf of Beckhoff Automation Indonesia By ***Ibrani Budiarso***.
 
 ## About
 This documentation will include all the necessary syntax based on Beckhoff Infosys Webpage including all of the descriptions to ensure the reader to understand. I do hope this guide will be helpful in the future system development
